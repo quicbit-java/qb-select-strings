@@ -4,12 +4,13 @@ import org.junit.Assert;
 
 import java.io.PrintStream;
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
 
-public class TestContext {
+public class TestKit {
     PrintStream out = System.out;
+    int num_tests = 0;
+    int num_ok = 0;
 
     @FunctionalInterface
     public interface RowFn {
@@ -26,7 +27,15 @@ public class TestContext {
         }
 
         public String str(String n) {
-            return (String) values[table.indexOf(n)];
+            return (String) obj(n);
+        }
+
+        public int ival(String n) {
+            return (int) obj(n);
+        }
+
+        public Object obj(String n) {
+            return values[table.indexOf(n)];
         }
 
         public Object expected () {
@@ -41,15 +50,31 @@ public class TestContext {
             Object[] a = (Object[]) values[table.indexOf(n)];
             return Arrays.copyOf(a, a.length, String[].class);
         }
+
+        public int[] intarr(String n) {
+            Object[] a = (Object[]) values[table.indexOf(n)];
+            int[] ret = new int[a.length];
+            for (var i=0; i<a.length; i++) {
+                ret[i] = (int) a[i];
+            }
+            return ret;
+        }
+
+        public List<Integer> intlist(String n) {
+            Object[] a = (Object[]) values[table.indexOf(n)];
+            List<Integer> ret = new ArrayList<>(a.length);
+            for (Object v : a) { ret.add((Integer) v); }
+            return ret;
+        }
     }
 
     static class Table {
-        TestContext context;
+        TestKit context;
         String[] header;
         Row[] rows;
         Map<String, Integer> colsByName;
 
-        public Table(TestContext context, Object[]... all_rows) {
+        public Table(TestKit context, Object[]... all_rows) {
             this.context = context;
             String[] header = Arrays.copyOf(all_rows[0], all_rows[0].length, String[].class);
             colsByName = new HashMap<>();
@@ -73,12 +98,14 @@ public class TestContext {
             return idx;
         }
 
-        public void test(RowFn fn) {
+        public void test(String name, RowFn fn) {
+            context.out.println("# " + name);
             boolean ok = true;
             for (Row row : this.rows) {
                 Object actual = fn.apply(row);
                 Object expected = row.expected();
                 String msg = format(row.inputs()) + " -expect-> " + format(actual);
+                context.num_tests++;
                 try {
                     if (expected != null && expected.getClass().isArray()) {
                         Object[] reta = arrayOf(actual);
@@ -87,13 +114,16 @@ public class TestContext {
                     } else {
                         Assert.assertEquals(expected, actual);
                     }
-                    context.out.println("ok : " + msg);
-                } catch (AssertionError e) {
+                    context.num_ok++;
+                    context.out.println("ok " + context.num_tests + " : " + msg);
+                } catch (Exception e) {
                     ok = false;
-                    context.out.println("not ok : " + msg);
+                    context.out.println("not ok " + context.num_tests + " : " + msg);
                     context.out.println("  ---");
                     context.out.println("    expected: " + format(expected));
                     context.out.println("    actual:   " + format(actual));
+                    context.out.println("    " + e.getMessage());
+                    e.printStackTrace(context.out);
                 }
             }
             if (!ok) {
@@ -120,7 +150,8 @@ public class TestContext {
         return ret;
     }
 
-    public static Table table(Object[]... rows) { return new Table(new TestContext(), rows); }
+    public static Pattern regex(String s) { return Pattern.compile(s); }
+    public static Table table(Object[]... rows) { return new Table(new TestKit(), rows); }
     public static Object[] a (Object... a) { return a; }
     public static String[] sa (Object... a) { return Arrays.copyOf(a, a.length, String[].class); }
 }
