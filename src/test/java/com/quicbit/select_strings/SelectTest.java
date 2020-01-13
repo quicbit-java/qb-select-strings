@@ -2,6 +2,7 @@ package com.quicbit.select_strings;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.quicbit.select_strings.TestKit.*;
@@ -46,16 +47,16 @@ public class SelectTest {
     @Test
     public void testSelectMany () {
         table(
-            a( "expressions",              "strings",                                                                "expect" ),
-            a( a( "a", "b" ),              a( "a", "b" ),                                                            a( "a", "b" ) ),
-            a( a( "*" ),                   a( "a", "b" ),                                                            a( "a", "b" ) ),
-            a( a( "a", "c" ),              a( "a", "b", "c" ),                                                       a( "a", "c" ) ),
-            a( a( "c", "*" ),              a( "a", "b", "c" ),                                                       a( "c", "a", "b" ) ),
-            a( a( "*", "c" ),              a( "a", "b", "c" ),                                                       a( "a", "b", "c" ) ),
-            a( a( "*", "c", "a" ),         a( "a", "b", "c" ),                                                       a( "b", "c", "a" ) ),
-            a( a( "*", "c", "a", "*" ),    a( "a", "b", "c" ),                                                       a( "b", "c", "a" ) ),
-            a( a( "c", "*" ),              a( "a", "", "c" ),                                                        a( "c", "a", "" ) ),
-            a( a( "c", "*" ),              a( "a", null, "c" ),                                                 a( "c", "a", null ) ),
+            a( "expressions",              "strings",                "expect" ),
+            a( a( "a", "b" ),              a( "a", "b" ),            a( "a", "b" ) ),
+            a( a( "*" ),                   a( "a", "b" ),            a( "a", "b" ) ),
+            a( a( "a", "c" ),              a( "a", "b", "c" ),       a( "a", "c" ) ),
+            a( a( "c", "*" ),              a( "a", "b", "c" ),       a( "c", "a", "b" ) ),
+            a( a( "*", "c" ),              a( "a", "b", "c" ),       a( "a", "b", "c" ) ),
+            a( a( "*", "c", "a" ),         a( "a", "b", "c" ),       a( "b", "c", "a" ) ),
+            a( a( "*", "c", "a", "*" ),    a( "a", "b", "c" ),       a( "b", "c", "a" ) ),
+            a( a( "c", "*" ),              a( "a", "", "c" ),        a( "c", "a", "" ) ),
+            a( a( "c", "*" ),              a( "a", null, "c" ),      a( "c", "a", null ) ),
             a(
                 a( "fr*", "t*", "/((at)|(as)).*/", "*" ),
                 a( "from", "tangy", "title", "fribble", "fact", "slipper", "at", "ask" ),
@@ -69,21 +70,31 @@ public class SelectTest {
 
     @Test
     public void testInject () {
-        String s = null;
         table(
-            a( "a",          "off", "insert", "exp" ),
-            a( a(),          0,     a(),      a() ),
-            a( a( 3 ),       0,     a( 3 ),   a( 3 ) ),
-            a( a(  3 ),      1,     a( 3 ),   a(  3 ) ),
-            a( a( 3, 1, 2 ), 0,     a( 3 ),   a( 3, 1, 2 ) ),
-            a( a( 3, 1 ),    0,     a( 3 ),   a( 3, 1 ) )
+            a( "input",   "off", "insert", "exp" ),
+            a( a(),       0,     a(),      a() ),
+            a( a(),       0,     a( 3 ),   a( 3 ) ),
+//            a( a(),       1,     a( 3 ),   a( null, 3 ) ),  // this case, from the javascript tests, is not needed - we don't inject greater than length
+            a( a( 1, 2 ), 0,     a( 3 ),   a( 3, 1, 2 ) ),
+            a( a( 1 ),    0,     a( 3 ),   a( 3, 1 ) )
         ).test(
             "inject",
             (r) -> {
-                List<Integer> ret = r.intlist("a");
-                inject(r.intlist("a"), r.ival("off"), r.intlist("insert"));
+                List<Integer> ret = r.intlist("input");
+                inject(ret, r.ival("off"), r.intlist("insert"));
                 return ret.toArray();
             }
         );
+    }
+
+    @Test
+    public void testAdd () {
+        List<Integer> a = new ArrayList<>();
+        a.add(3);
+        a.add(0, 1);
+        System.out.println(a);
+        a.add(1, 2);
+        System.out.println(a);
+
     }
 }

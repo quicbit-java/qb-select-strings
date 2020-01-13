@@ -14,19 +14,28 @@ public class Select {
     static class MatchRE implements Match {
         Pattern p;
         MatchRE (String s)                { this.p = Pattern.compile(s); }
-        public boolean matches (String s) { return p.matcher(s).matches(); }
+        public boolean matches (String s) { return s != null && p.matcher(s).matches(); }
     }
 
     static class MatchStr implements Match {
         private String s;
         MatchStr (String s)               { this.s = s; }
-        public boolean matches (String s) { return s.equals(this.s); }
+        public boolean matches (String s) { return s != null && s.equals(this.s); }
+    }
+
+    static class MatchNull implements Match {
+        MatchNull() {}
+        public boolean matches (String s) { return s == null; }
     }
 
     final static Match MATCH_REMAINING = s -> true;  // not actually called - handled specially to collect all remaining
 
     public static Match rex (String expr) {
-        if(!expr.contains("*")) {
+        if (expr == null) {
+            return new MatchNull();
+        } else if(expr.startsWith("/") && expr.endsWith("/")) {
+            return new MatchRE(expr.substring(1, expr.length()-1));
+        } else if(!expr.contains("*")) {
             return new MatchStr(expr);
         } else if(expr.trim().equals("*")) {
             return MATCH_REMAINING;  // special expression.  non-greedy. collects all unmatched.
@@ -40,6 +49,7 @@ public class Select {
         return '^' + s.replaceAll("[*]", ".*") + '$';              // xyz*123 -> ^xyz.*123$
     }
 
+    // expressions may be strings with simple wild-card "*" or "/.../" regular expressions
     public static String[] select (String[] expressions, String[] strings) {
         return _select(Arrays.stream(expressions).map(Select::rex).toArray(Match[]::new), strings);
     }
@@ -47,11 +57,7 @@ public class Select {
 // insert all items from array b into array a at offset off
 //   inject([0,3], 1, [1,2])  gives:  [0,1,2,3]
     static <T> void inject (List<T> a, int off, List<T> b) {
-
-        int alen = a.size();
         int blen = b.size();
-
-        for (int i=alen-1; i >= off; i--) { a.add(i + blen, a.get(i)); } // move items to end. copyWithin() not supported by InternetExplorer
         for (int i=0; i<blen; i++) { a.add(off + i, b.get(i)); }
     }
 

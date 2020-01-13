@@ -17,6 +17,10 @@ public class TestKit {
         Object apply(Row r);
     }
 
+    static class Options {
+        int max_tests = 0;
+    }
+
     static class Row {
         Object[] values;
         Table table;
@@ -66,6 +70,13 @@ public class TestKit {
             for (Object v : a) { ret.add((Integer) v); }
             return ret;
         }
+
+        public List<Object> list (String n) {
+            Object[] a = (Object[]) values[table.indexOf(n)];
+            List<Object> ret = new ArrayList<>(a.length);
+            ret.addAll(Arrays.asList(a));
+            return ret;
+        }
     }
 
     static class Table {
@@ -98,7 +109,17 @@ public class TestKit {
             return idx;
         }
 
-        public void test(String name, RowFn fn) {
+        public void test1 (String name, RowFn fn) {
+            Options opt = new Options();
+            opt.max_tests = 1;
+            _test(name, fn, opt);
+        }
+
+        public void test (String name, RowFn fn) {
+            _test(name, fn, new Options());
+        }
+
+        public void _test(String name, RowFn fn, Options opt) {
             context.out.println("# " + name);
             boolean ok = true;
             for (Row row : this.rows) {
@@ -106,6 +127,9 @@ public class TestKit {
                 Object expected = row.expected();
                 String msg = format(row.inputs()) + " -expect-> " + format(actual);
                 context.num_tests++;
+                if(opt.max_tests != 0 && context.num_tests >= opt.max_tests) {
+                    continue;
+                }
                 try {
                     if (expected != null && expected.getClass().isArray()) {
                         Object[] reta = arrayOf(actual);
