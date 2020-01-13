@@ -54,8 +54,8 @@ public class Select {
         return _select(Arrays.stream(expressions).map(Select::rex).toArray(Match[]::new), strings);
     }
 
-// insert all items from array b into array a at offset off
-//   inject([0,3], 1, [1,2])  gives:  [0,1,2,3]
+    // insert all items from array b into array a at offset off
+    //   inject([0,3], 1, [1,2])  gives:  [0,1,2,3]
     static <T> void inject (List<T> a, int off, List<T> b) {
         int blen = b.size();
         for (int i=0; i<blen; i++) { a.add(off + i, b.get(i)); }
