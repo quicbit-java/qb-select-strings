@@ -174,7 +174,6 @@ public class TestKit {
         return ret;
     }
 
-    public static Pattern regex(String s) { return Pattern.compile(s); }
     public static Table table(Object[]... rows) { return new Table(new TestKit(), rows); }
     public static Object[] a (Object... a) { return a; }
     public static String[] sa (Object... a) { return Arrays.copyOf(a, a.length, String[].class); }

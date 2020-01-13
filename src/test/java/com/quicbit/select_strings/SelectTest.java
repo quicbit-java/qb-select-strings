@@ -51,6 +51,7 @@ public class SelectTest {
             a( a( "a", "b" ),              a( "a", "b" ),            a( "a", "b" ) ),
             a( a( "*" ),                   a( "a", "b" ),            a( "a", "b" ) ),
             a( a( "a", "c" ),              a( "a", "b", "c" ),       a( "a", "c" ) ),
+            a( a( null, "c" ),             a( "a", null, "c", null ),      a( null, null, "c" ) ),
             a( a( "c", "*" ),              a( "a", "b", "c" ),       a( "c", "a", "b" ) ),
             a( a( "*", "c" ),              a( "a", "b", "c" ),       a( "a", "b", "c" ) ),
             a( a( "*", "c", "a" ),         a( "a", "b", "c" ),       a( "b", "c", "a" ) ),
