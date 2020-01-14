@@ -16,7 +16,7 @@ public class SelectTest {
             a( "s",      "exp" ),
             a( "*",      "^.*$" ),
             a( "a|*2#(", "^a\\|.*2\\#\\($" )
-        ).test("regex",
+        ).test("regex(s)",
                 (r) -> escape_re(r.str("s"))
         );
     }
@@ -39,7 +39,7 @@ public class SelectTest {
             a( a( "b*" ),     a( "bc" ),           sa( "bc" ) ),
             a( a( "*b" ),     a( "ab" ),           sa( "ab" ) ),
             a( a( "*b" ),     a( "a", "ab", "c" ), sa( "ab" ) )
-        ).test("select zero or one",
+        ).test("select(expressions, strings)",
             (r) -> select(r.strarr("expressions"), r.strarr("strings"))
         );
     }
@@ -64,7 +64,7 @@ public class SelectTest {
                 a( "from", "fribble", "tangy", "title", "at", "ask", "fact", "slipper" )
             )
         ).test(
-            "select many",
+            "select(expressions, strings)",
             (r) -> select(r.strarr("expressions"), r.strarr("strings"))
         );
     }
@@ -79,7 +79,7 @@ public class SelectTest {
             a( a( 1, 2 ), 0,     a( 3 ),   a( 3, 1, 2 ) ),
             a( a( 1 ),    0,     a( 3 ),   a( 3, 1 ) )
         ).test(
-            "inject",
+            "inject(input, off, insert)",
             (r) -> {
                 List<Integer> ret = r.intlist("input");
                 inject(ret, r.ival("off"), r.intlist("insert"));
