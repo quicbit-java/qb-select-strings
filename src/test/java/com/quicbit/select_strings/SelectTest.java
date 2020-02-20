@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.quicbit.select_strings.TestKit.*;
+import static com.quicbit.testkit.TestKit.*;
 import static com.quicbit.select_strings.Select.*;
 
 public class SelectTest {
