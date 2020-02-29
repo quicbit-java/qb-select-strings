@@ -1,3 +1,19 @@
+// Software License Agreement (ISC License)
+//
+// Copyright (c) 2020, Matthew Voss
+//
+// Permission to use, copy, modify, and/or distribute this software for
+// any purpose with or without fee is hereby granted, provided that the
+// above copyright notice and this permission notice appear in all copies.
+//
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+// ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+// ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+// OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
 package com.quicbit.select_strings;
 
 import java.util.ArrayList;
@@ -56,7 +72,14 @@ public class Select {
 
     // insert all items from array b into array a at offset off
     //   inject([0,3], 1, [1,2])  gives:  [0,1,2,3]
+    // inserting at indexes greater than a.size() will result in null filler for
+    // the extended portion, similar to behavior of
+    // javascript arrays (though less efficient for large gapss)
     static <T> void inject (List<T> a, int off, List<T> b) {
+        int n = off - a.size();
+        if (n > 0) {
+            for (int i=0; i<n; i++) { a.add(null); }
+        }
         int blen = b.size();
         for (int i=0; i<blen; i++) { a.add(off + i, b.get(i)); }
     }
